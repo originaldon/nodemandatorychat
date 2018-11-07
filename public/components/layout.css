@@ -1,0 +1,36 @@
+.container {
+    height: 95vh;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1fr 4fr 1fr;
+    grid-gap: 0.3em;
+}
+
+.cell {
+    background-color: white;
+}
+
+.for-header {
+    grid-column: 1/7;
+    background-color: blanchedalmond;
+}
+
+.left-menu {
+    grid-column: 1/2;
+    background-color: deeppink;
+}
+
+.main-chat {
+    grid-column: 2/6;
+    background-color: deepskyblue;
+}
+
+.right-menu {
+    grid-column: 6/7;
+    background-color: darkolivegreen;
+}
+
+.for-footer {
+    grid-column: 1/7;
+    background-color: darkseagreen;
+}

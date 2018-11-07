@@ -1,0 +1,33 @@
+body {
+    display: grid;
+    grid-template-columns: 1fr, 1fr, 1fr;
+    grid-auto-rows: 200px;
+}
+
+ul {
+    list-style: none;
+}
+
+.top {
+    grid-column: 1/ span 3;
+}
+
+.mid-left {
+    grid-column: 1;
+}
+
+.login-field {
+    text-align: center;
+    background-color: lavender;
+    grid-column: 2;
+    border-radius: 15px;
+}
+
+.mid-rigth {
+    grid-column: 3;
+}
+
+.bottom {
+    grid-column: 1/ span 3;
+}
+

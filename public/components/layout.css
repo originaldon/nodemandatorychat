@@ -20,9 +20,21 @@
     background-color: deeppink;
 }
 
-.main-chat {
+.main-area {
     grid-column: 2/6;
-    background-color: deepskyblue;
+    display: grid;
+    grid-template-rows: 6fr 1fr;
+    grid-gap: 0.1em;
+}
+
+.main-chat {
+    grid-column: span;
+    background-color: grey;
+}
+
+.message-input {
+    grid-column: span;
+    background-color: rgb(216, 130, 130);
 }
 
 .right-menu {
@@ -33,4 +45,13 @@
 .for-footer {
     grid-column: 1/7;
     background-color: darkseagreen;
+}
+
+.text-input {
+    margin: 1em;
+}
+
+.text-input .textarea {
+    width: 200px;
+    height: 20px;
 }

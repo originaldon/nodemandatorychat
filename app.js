@@ -1,21 +1,25 @@
 const Knex = require("knex");
 const express = require('express');
 const app = express();
-const cors = require('cors');
+//const cors = require('cors');
 const Model = require("objection").Model;
 const knexConfig = require("./knexfile");
 const bodyParser = require('body-parser');
-//const router = express.Router();
-//const userRoutes = require('./routes/user');
-//userRoutes.userRoutes(app);
+
+/*
+const router = express.Router();
+const userRoutes = require('./routes/user');
+userRoutes.userRoutes(app);
+*/
 //TODO : fix routing
 
+/*
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
-
+*/
 
 const session = require('express-session')
 app.use(session({
@@ -30,15 +34,20 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/public', express.static('public'))
-app.use(cors({credentials: true, origin:true}));
+//app.use(cors({credentials: true, origin:true}));
+const server = require('http').createServer(app);
+const io = require('socket.io').listen(server);
+
 
 // use the driver and connect locally to mysql
 const knex = Knex(knexConfig.development);
 Model.knex(knex);
 const db = {
     "knex": knex,
-    "users": require("./models/Users")
+    "users": require("./models/Users"),
+    "messages": require("./models/Messages")
 };
+
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/public/index/index.html")
@@ -47,7 +56,7 @@ app.get("/", function (req, res) {
 app.get("/freshfruit", function (req,res){
     console.log("Inside freshfruit endpoint")
     console.log(req.session.isLoggedIn)
-    if(req.session.isLoggedIn === true){
+    if(req.session.isLoggedIn){
         console.log(__dirname + "/public/freshFruit/freshFruit.html")
         res.sendFile(__dirname + "/public/freshFruit/freshFruit.html");
     }else{
@@ -62,11 +71,83 @@ app.get("/bananachat", function (req,res){
 app.get("/bunchofgrapes", function (req,res){
     res.sendFile(__dirname + "/public/bunchofgrapes/bunchofgrapes.html");
 });
+/*
+app.get("/get-messages", (req, res) =>{
+    //if (req.session.isLoggedIn){
+        let updateArray = [{"user": "test", "message": "test"}];
+        //hardcoded room id
+        db.messages.query().select().where({"room_id": 1}).then(messageArray => {
+            console.log(messageArray);
+            
+            messageArray.forEach(element => {
+                db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
+                    console.log(userArray);
+                    updateArray.push({"user": userArray[0].username, "message": element.message_text});
+                    console.log({"user": userArray[0].username, "message": element.message_text});
+                    console.log("updated array during: " + updateArray);
+                });
+                
+            });
+    }).done(() => {
+        console.log("updatedArray: " + updateArray);
+        res.send(updateArray);
+    });
+    //}
+    //res.send({ "status": 403, "response": "unauthorized"});
+});*/
 
-app.listen(3000, function (err) {
-    if (err) throw err;
 
-    console.log("the server is running");
+io.on('connect', socket => {
+
+    db.messages.query().select().where({"room_id": 1}).then(messageArray => {
+        console.log(messageArray);
+        
+        messageArray.forEach(element => {
+            db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
+                console.log(userArray);
+                //socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
+                socket.emit('fruit-chat', {"user_name": userArray[0].username, "message": element.message_text});
+                console.log({"user": userArray[0].username, "message": element.message_text});
+                //console.log("updated array during: " + updateArray);
+            });
+            
+        });
+    });
+
+
+
+    socket.on('fruit-chat', data => {
+        // emits to all the sockets
+        console.log("got a fruit-chat message");
+        console.log(data);
+        //db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
+        db.users.query().select({"id": "id"}).where({"username": data.user_name}).then(userArray => {
+            console.log("userArray: " + userArray);
+            const userId = userArray[0].id;
+            console.log("user_id " + userId);
+            db.messages.query().insert({ "message_text": data.message, "user_id": userId, "room_id": 1, "timestamp": new Date() }).then(persistedData => {
+                console.log(persistedData);
+            }).then(() => {
+            io.emit("fruit-chat", data);
+            });
+        });
+        //hardcoded roomId!!
+        
+
+        /*
+        id: {type: 'integer'},
+                message_text: {type: 'integer'},
+                user_id: {type: 'integer'},
+                room_id: {type: 'integer'},
+                timestamp: {type: 'dateTime'}
+        */
+
+        // emits only to the specific socket
+        //socket.emit("here's the color", data);
+        
+        // emits to all but the socket itself
+        //socket.broadcast.emit("here's the color", data);
+    })
 })
 
 //routing ->
@@ -135,3 +216,8 @@ app.get('/logout', (req,res) => {
 });
 
 
+server.listen(3000, function (err) {
+    if (err) throw err;
+
+    console.log("the server is running");
+});

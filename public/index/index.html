@@ -41,7 +41,9 @@
 
     <script>
 
+
     $( "#logInButton" ).click(function(event) {
+
         event.preventDefault();
         const jsonFormObj = {"username":$("#emailField").val(), "password":$("#passwordField").val()};
         console.log(jsonFormObj); 
@@ -54,6 +56,9 @@
             console.log(data);
             if(data.response === 'Logged In'){
                 $('#response').text('You are logged in');
+
+                window.localStorage.username = $("#emailField").val();
+
                 window.location.replace("/freshfruit");
             }else if(data.response === 'User written to db'){
                 $('#response').text('New user created');

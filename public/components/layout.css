@@ -48,8 +48,10 @@
 }
 
 .left-menu {
-    grid-column: 1/2;
-    background-color: deeppink;
+    grid-column: 1/2;   
+    background-image: url("./images/oranges-960x540.png");
+    background-repeat: no-repeat;
+    max-width: 100%;
 }
 
 .main-area {

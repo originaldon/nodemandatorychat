@@ -39,7 +39,7 @@
             console.log("script runs - freshfruit");
             const socket = io.connect('http://localhost:3000');
             $("#chatchat").click((event) => {
-                const userName = "default-user";
+                const userName = window.localStorage.username;
                 event.preventDefault();
                 console.log("happens");
                if (socket.connected){
@@ -50,7 +50,7 @@
                 //$('#main-chat').val($('#main-chat').val() + "\r\n" + userName + ": " + $("#text-input").val());
                 $("#text-input").val("") 
                } else {
-                   alert("You have been disconnected");
+                   //alert("You have been disconnected");
                    window.location.replace('/');
                }
                  

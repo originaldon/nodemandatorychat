@@ -1,6 +1,6 @@
 const Model = require('objection').Model;
 
-class Messages extends Model {
+class Message extends Model {
     static get tableName() {
         return 'messages';
     }
@@ -12,7 +12,7 @@ class Messages extends Model {
 
             properties: {
                 id: {type: 'integer'},
-                message_text: {type: 'integer'},
+                message_text: {type: 'string'},
                 user_id: {type: 'integer'},
                 room_id: {type: 'integer'},
                 timestamp: {type: 'dateTime'}

@@ -44,7 +44,8 @@ const knex = Knex(knexConfig.development);
 Model.knex(knex);
 const db = {
     "knex": knex,
-    "users": require("./models/Users")
+    "users": require("./models/Users"),
+    "messages": require("./models/Messages")
 };
 
 
@@ -77,7 +78,27 @@ io.on('connect', socket => {
         // emits to all the sockets
         console.log("got a fruit-chat message");
         console.log(data);
-        io.emit("fruit-chat", data);
+        //db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
+        db.users.query().select({"id": "id"}).where({"username": data.user_name}).then(userArray => {
+            console.log("userArray: " + userArray);
+            const userId = userArray[0].id;
+            console.log("user_id " + userId);
+            db.messages.query().insert({ "message_text": data.message, "user_id": userId, "room_id": 1, "timestamp": new Date() }).then(persistedData => {
+                console.log(persistedData);
+            }).then(() => {
+            io.emit("fruit-chat", data);
+            });
+        });
+        //hardcoded roomId!!
+        
+
+        /*
+        id: {type: 'integer'},
+                message_text: {type: 'integer'},
+                user_id: {type: 'integer'},
+                room_id: {type: 'integer'},
+                timestamp: {type: 'dateTime'}
+        */
 
         // emits only to the specific socket
         //socket.emit("here's the color", data);

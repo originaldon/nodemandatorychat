@@ -12,3 +12,13 @@ function handler(){
     //based on chat theme load various 
     $("#chat").load("../public/components/layout.html");
 }
+/*
+window.onload = function() {
+    if (window.jQuery) {  
+        // jQuery is loaded  
+        alert("Yeah!");
+    } else {
+        // jQuery is not loaded
+        alert("Doesn't Work");
+    }
+}*/

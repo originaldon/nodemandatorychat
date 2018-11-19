@@ -36,7 +36,18 @@
         </div>
     </div>
     <script>
-            console.log("script runs - freshfruit");
+        /*
+        $.ajax({
+            "url": "get-messages",
+            
+            "method": "GET"
+        }).done(res => {
+            console.log(res);
+            res.array.forEach(element => {
+                $('#main-chat').append("<p>" + element.user + ": " + element.message + "</p>");
+            });
+        });*/
+            console.log("script runs - layout");
             const socket = io.connect('http://localhost:3000');
             $("#chatchat").click((event) => {
                 const userName = window.localStorage.username;
@@ -46,7 +57,7 @@
                 socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
                 //var chatscreen = $('#cell main-chat');
                 console.log("<p>" + userName + ": " + $("#text-input").val() + "</p>")
-                $('#main-chat').append("<p>" + userName + ": " + $("#text-input").val() + "</p>");
+                //$('#main-chat').append("<p>" + userName + ": " + $("#text-input").val() + "</p>");
                 //$('#main-chat').val($('#main-chat').val() + "\r\n" + userName + ": " + $("#text-input").val());
                 $("#text-input").val("") 
                } else {
@@ -56,6 +67,9 @@
                  
     
                     });
+            socket.on("fruit-chat", (fruitMessage) => {
+                $('#main-chat').append("<p>" + fruitMessage.user_name + ": " + fruitMessage.message + "</p>");
+            });
                 </script>
     
 </body>

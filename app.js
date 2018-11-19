@@ -71,9 +71,51 @@ app.get("/bananachat", function (req,res){
 app.get("/bunchofgrapes", function (req,res){
     res.sendFile(__dirname + "/public/bunchofgrapes/bunchofgrapes.html");
 });
+/*
+app.get("/get-messages", (req, res) =>{
+    //if (req.session.isLoggedIn){
+        let updateArray = [{"user": "test", "message": "test"}];
+        //hardcoded room id
+        db.messages.query().select().where({"room_id": 1}).then(messageArray => {
+            console.log(messageArray);
+            
+            messageArray.forEach(element => {
+                db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
+                    console.log(userArray);
+                    updateArray.push({"user": userArray[0].username, "message": element.message_text});
+                    console.log({"user": userArray[0].username, "message": element.message_text});
+                    console.log("updated array during: " + updateArray);
+                });
+                
+            });
+    }).done(() => {
+        console.log("updatedArray: " + updateArray);
+        res.send(updateArray);
+    });
+    //}
+    //res.send({ "status": 403, "response": "unauthorized"});
+});*/
 
 
 io.on('connect', socket => {
+
+    db.messages.query().select().where({"room_id": 1}).then(messageArray => {
+        console.log(messageArray);
+        
+        messageArray.forEach(element => {
+            db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
+                console.log(userArray);
+                //socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
+                socket.emit('fruit-chat', {"user_name": userArray[0].username, "message": element.message_text});
+                console.log({"user": userArray[0].username, "message": element.message_text});
+                //console.log("updated array during: " + updateArray);
+            });
+            
+        });
+    });
+
+
+
     socket.on('fruit-chat', data => {
         // emits to all the sockets
         console.log("got a fruit-chat message");
@@ -178,4 +220,4 @@ server.listen(3000, function (err) {
     if (err) throw err;
 
     console.log("the server is running");
-})
+});

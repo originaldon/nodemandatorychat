@@ -2,8 +2,10 @@
     height: 95vh;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: 1fr 4fr 1fr;
+    grid-template-rows: 1fr 4fr 0.5fr;
     grid-gap: 0.3em;
+    background-color: goldenrod;
+
 }
 
 .cell {
@@ -12,12 +14,44 @@
 
 .for-header {
     grid-column: 1/7;
-    background-color: blanchedalmond;
+    display: grid;
+    grid-template-columns: 1 fr 4fr 1 fr;
+    background-color: white;
+}
+
+.logo {
+    grid-column: 1/2;
+    text-align: center;
+    background-color: white;
+}
+
+.logo img {
+    max-width: 100px;
+    max-height: 100px;
+    background-color: white;
+}
+
+.title {
+    grid-column: 2/6;
+    text-align: center;
+    background-color: white;
+}
+
+.title img {
+    max-height: 100px;
+}
+
+.log-out {
+    grid-column: 6/7;
+    text-align: center;
+    background-color: white;
 }
 
 .left-menu {
-    grid-column: 1/2;
-    background-color: deeppink;
+    grid-column: 1/2;   
+    background-image: url("./images/oranges-960x540.png");
+    background-repeat: no-repeat;
+    max-width: 100%;
 }
 
 .main-area {

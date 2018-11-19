@@ -5,20 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Python Fruit Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="index.css" />
-    <script src="main.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="index.css" />-->
+    <script src="../public/main.js"></script>
 </head>
 <body>
     <div class="top"></div>
     <div class="mid-left"></div>
     <div class="login-field">
-        <form>
+        <form id="submitform">
             <ul>
                 <li>
-                    <input type="text" class="email" name="emailField" id="emailField" placeholder="enter email">
+                    <input type="text" class="email" name="emailField" id="emailField" placeholder="enter email" value="x">
                 </li>
                 <li>
-                    <input type="text" class="password" name="passwordField" id="passwordField" placeholder="enter password">
+                    <input type="text" class="password" name="passwordField" id="passwordField" placeholder="enter password" value="y">
                 </li>
                 <li>
                     <button type="submit" id="signUpButton">
@@ -34,7 +35,34 @@
             
         </form>
     </div>
+    <div id="response"></div>
     <div class="mid-right"></div>
     <div class="bottom"></div>
+
+    <script>
+
+    $( "#logInButton" ).click((event) => {
+        event.preventDefault();
+        const jsonFormObj = {"username":$("#emailField").val(), "password":$("#passwordField").val()};
+        console.log(jsonFormObj); 
+        $.ajax({
+            url: '/signup',
+            type: 'POST',
+            data: jsonFormObj,
+            dataType: 'json'
+        }).done(function(data){
+            console.log(data);
+            if(data.response === 'Logged In'){
+                $('#response').text('You are logged in');
+                window.location.replace("/freshfruit");
+            }else if(data.response === 'User written to db'){
+                $('#response').text('New user created');
+            }else{
+                $('#response').text('You are not logged in');
+            }
+        })
+    });
+    </script>
+
 </body>
 </html>

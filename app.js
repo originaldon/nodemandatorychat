@@ -1,21 +1,25 @@
 const Knex = require("knex");
 const express = require('express');
 const app = express();
-const cors = require('cors');
+//const cors = require('cors');
 const Model = require("objection").Model;
 const knexConfig = require("./knexfile");
 const bodyParser = require('body-parser');
-//const router = express.Router();
-//const userRoutes = require('./routes/user');
-//userRoutes.userRoutes(app);
+
+/*
+const router = express.Router();
+const userRoutes = require('./routes/user');
+userRoutes.userRoutes(app);
+*/
 //TODO : fix routing
 
+/*
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
-
+*/
 
 const session = require('express-session')
 app.use(session({
@@ -30,7 +34,10 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/public', express.static('public'))
-app.use(cors({credentials: true, origin:true}));
+//app.use(cors({credentials: true, origin:true}));
+const server = require('http').createServer(app);
+const io = require('socket.io').listen(server);
+
 
 // use the driver and connect locally to mysql
 const knex = Knex(knexConfig.development);
@@ -40,6 +47,7 @@ const db = {
     "users": require("./models/Users")
 };
 
+
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/public/index/index.html")
 });
@@ -47,7 +55,7 @@ app.get("/", function (req, res) {
 app.get("/freshfruit", function (req,res){
     console.log("Inside freshfruit endpoint")
     console.log(req.session.isLoggedIn)
-    if(req.session.isLoggedIn === true){
+    if(req.session.isLoggedIn){
         console.log(__dirname + "/public/freshFruit/freshFruit.html")
         res.sendFile(__dirname + "/public/freshFruit/freshFruit.html");
     }else{
@@ -63,10 +71,20 @@ app.get("/bunchofgrapes", function (req,res){
     res.sendFile(__dirname + "/public/bunchofgrapes/bunchofgrapes.html");
 });
 
-app.listen(3000, function (err) {
-    if (err) throw err;
 
-    console.log("the server is running");
+io.on('connect', socket => {
+    socket.on('fruit-chat', data => {
+        // emits to all the sockets
+        console.log("got a fruit-chat message");
+        console.log(data);
+        io.emit("fruit-chat", data);
+
+        // emits only to the specific socket
+        //socket.emit("here's the color", data);
+        
+        // emits to all but the socket itself
+        //socket.broadcast.emit("here's the color", data);
+    })
 })
 
 //routing ->
@@ -135,3 +153,8 @@ app.get('/logout', (req,res) => {
 });
 
 
+server.listen(3000, function (err) {
+    if (err) throw err;
+
+    console.log("the server is running");
+})

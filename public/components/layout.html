@@ -6,6 +6,7 @@
     <title>Layout</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="../public/components/layout.css" />
+    
 </head>
 <body>
     <div class="container">
@@ -16,14 +17,14 @@
             cell left menu
         </div>
         <div class="cell main-area">
-                <div class="cell main-chat">
+                <div class="cell main-chat" id="main-chat">
                         cell main-chat
                     </div>
             <div class="cell message-input">
                 cell messages-input
                 <form>
-                    <input class="text-input" type="text-area"/>
-                    <button>SEND MESSAGE</button>
+                    <input class="text-input" type="text-area" id="text-input"/>
+                    <button id="chatchat">SEND MESSAGE</button>
                 </form>
             </div>
         </div>   
@@ -34,5 +35,28 @@
             cell for-footer
         </div>
     </div>
+    <script>
+            console.log("script runs - freshfruit");
+            const socket = io.connect('http://localhost:3000');
+            $("#chatchat").click((event) => {
+                const userName = "default-user";
+                event.preventDefault();
+                console.log("happens");
+               if (socket.connected){
+                socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
+                //var chatscreen = $('#cell main-chat');
+                console.log("<p>" + userName + ": " + $("#text-input").val() + "</p>")
+                $('#main-chat').append("<p>" + userName + ": " + $("#text-input").val() + "</p>");
+                //$('#main-chat').val($('#main-chat').val() + "\r\n" + userName + ": " + $("#text-input").val());
+                $("#text-input").val("") 
+               } else {
+                   alert("You have been disconnected");
+                   window.location.replace('/');
+               }
+                 
+    
+                    });
+                </script>
+    
 </body>
 </html>

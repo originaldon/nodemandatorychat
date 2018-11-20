@@ -1,5 +1,10 @@
 exports.userRoutes = function(app) {
 
+    
+    
+    
+    //old user.js
+    /*
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
@@ -67,9 +72,9 @@ app.get('/logout', (req,res) => {
     res.redirect('/');
 
 });
+*/
 
-
-    /* old user.js
+    /* very old user.js
     const bcrypt = require('bcrypt');
     const saltRounds = 10;
 

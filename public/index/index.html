@@ -40,14 +40,14 @@
 
         event.preventDefault();
         const jsonFormObj = {"username":$("#emailField").val(), "password":$("#passwordField").val()};
-        console.log(jsonFormObj); 
+        //console.log(jsonFormObj); 
         $.ajax({
             url: '/signup',
             type: 'POST',
             data: jsonFormObj,
             dataType: 'json'
         }).done(function(data){
-            console.log(data);
+            //console.log(data);
             if(data.response === 'Logged In'){
                 $('#response').text('You are logged in');
 

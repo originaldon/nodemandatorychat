@@ -80,13 +80,13 @@
             socket.on("userjoin", (userData) => {
 
                 $(".right-menu").append("<div id=\"" + userData.username + "\">" + userData.username + "</div>");
-                console.log("<p id=\"" + userData.username + "\">" + userData.username + "</p>");
+                //console.log("<p id=\"" + userData.username + "\">" + userData.username + "</p>");
             });
             socket.on("userquit", userData => {
                 //console.log(userData);
                 //$(".right-menu").remove("#" + userData.username);
                 $("#" + userData.username).remove();
-                console.log("trying to remove ", "#" + userData.username);
+                //console.log("trying to remove ", "#" + userData.username);
             });
             /*
             socket.on("userlist", (data) => {

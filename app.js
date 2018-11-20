@@ -113,81 +113,81 @@ io.on('connect', socket => {
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-
+    
 app.post("/signup", function (req, res) {
     const enteredUsername = req.body.username;
     const enteredPassword = req.body.password;
-
+    
     if (enteredUsername && enteredPassword) {
-
+    
         //console.log('query db -> username:' + enteredUsername + " password -> " + enteredPassword) 
         // Herunder kan man bruge shorthand hvor man kun skriver password, hvis kollonen hedder password
         db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
-            //console.log("userarray", userArray);
-            if (userArray.length > 0) {
-                //console.log("entered pass: ", enteredPassword);
-                //console.log("pass from userarray: ", userArray[0]);
-
-                bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
-                    if(response) {
-                        req.session.isLoggedIn = true;
-                        //console.log("ses" + req.session.isLoggedIn);
-
-                        onlineUsersList.push(enteredUsername);
-                        //console.log(onlineUsersList);
-                        io.emit("userjoin", {"username": enteredUsername});
-
-                        res.json({"response":"Logged In"});
+        //console.log("userarray", userArray);
+        if (userArray.length > 0) {
+            //console.log("entered pass: ", enteredPassword);
+            //console.log("pass from userarray: ", userArray[0]);
+    
+            bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
+                if(response) {
+                    req.session.isLoggedIn = true;
+                    //console.log("ses" + req.session.isLoggedIn);
+    
+                    onlineUsersList.push(enteredUsername);
+                    //console.log(onlineUsersList);
+                    io.emit("userjoin", {"username": enteredUsername});
+    
+                    res.json({"response":"Logged In"});
                     } else {
                         res.json({"response":"Not loggedin"});
-                    }
-                });
-                
-            } else {
-                bcrypt.hash(enteredPassword, saltRounds).then(function(hash) {
-                    db.users.query().insert({ "username": enteredUsername, "password": hash }).then(persistedData => {
-                        //console.log(persistedData);
-                        res.json({"response":"User written to db"});
+                        }
                     });
-                });   
-            }
-        })
-    } else {
-        res.json({"response":"Not loggedin"});
-    }
-});
-
-// app.post('/login', (req, res) => {
-//     const enteredUsername = req.body.username;
-//     const enteredPassword = req.body.password; 
-
-//     db.users.query().select().where({email}).then(userArray => {
-//         if (userArray.length > 0) {
-//             bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
-//                 if(response) {
-//                     req.session.isLoggedIn = true;
-//                     console.log("ses" + req.session.isLoggedIn);
-//                     res.redirect('/freshfruit');
-//                 }
-//                 res.send({ "status": 403, "response": "unauthorized"})
-//             })
-//         }     
-//     })
-// });
-
-app.post('/logout', (req,res) => {
-    req.session.destroy();
-    var index = onlineUsersList.indexOf(req.body.username);
-    if (index > -1) {
-        onlineUsersList.splice(index, 1);
-    }
-    console.log(onlineUsersList);
-    //io.emit('userlist', onlineUsersList);
-    console.log(req.body.username);
-    io.emit('userquit', {"username" : req.body.username});
-    res.redirect("/");
-});
-
+                    
+                } else {
+                    bcrypt.hash(enteredPassword, saltRounds).then(function(hash) {
+                        db.users.query().insert({ "username": enteredUsername, "password": hash }).then(persistedData => {
+                            //console.log(persistedData);
+                            res.json({"response":"User written to db"});
+                        });
+                    });   
+                }
+            })
+        } else {
+            res.json({"response":"Not loggedin"});
+        }
+    });
+    
+    // app.post('/login', (req, res) => {
+    //     const enteredUsername = req.body.username;
+    //     const enteredPassword = req.body.password; 
+    
+    //     db.users.query().select().where({email}).then(userArray => {
+    //         if (userArray.length > 0) {
+    //             bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
+    //                 if(response) {
+    //                     req.session.isLoggedIn = true;
+    //                     console.log("ses" + req.session.isLoggedIn);
+    //                     res.redirect('/freshfruit');
+    //                 }
+    //                 res.send({ "status": 403, "response": "unauthorized"})
+    //             })
+    //         }     
+    //     })
+    // });
+    
+    app.post('/logout', (req,res) => {
+        req.session.destroy();
+        var index = onlineUsersList.indexOf(req.body.username);
+        if (index > -1) {
+            onlineUsersList.splice(index, 1);
+        }
+        console.log(onlineUsersList);
+        //io.emit('userlist', onlineUsersList);
+        console.log(req.body.username);
+        io.emit('userquit', {"username" : req.body.username});
+        res.redirect("/");
+    });
+    
 
 server.listen(3000, function (err) {
     if (err) throw err;

@@ -123,10 +123,10 @@ app.post("/signup", function (req, res) {
         //console.log('query db -> username:' + enteredUsername + " password -> " + enteredPassword) 
         // Herunder kan man bruge shorthand hvor man kun skriver password, hvis kollonen hedder password
         db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
-            //console.log(userArray);
+            //console.log("userarray", userArray);
             if (userArray.length > 0) {
-                //console.log(enteredPassword);
-                //console.log(userArray[0]);
+                //console.log("entered pass: ", enteredPassword);
+                //console.log("pass from userarray: ", userArray[0]);
 
                 bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
                     if(response) {

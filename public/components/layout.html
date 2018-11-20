@@ -36,10 +36,10 @@
             </div>
         </div>   
         <div class="cell right-menu">
-            cell right-menu
+            <h3>Online now:</h3>
         </div>
         <div class="cell for-footer">
-            cell for-footer
+            (c) Joey Hermano Enterprises
         </div>
     </div>
     <script>
@@ -78,6 +78,10 @@
                 $('#main-chat').append("<p>" + fruitMessage.user_name + ": " + fruitMessage.message + "</p>");       
                 $("#main-chat").scrollTop($("#main-chat").prop("scrollHeight"));
             });
+            socket.on("userlist", (userlist) => {
+                $(".right-menu").val = "";
+                $(".right-menu").append("<p>" + userlist + "</p>");
+            });
     </script>
 
     <script>
@@ -89,7 +93,10 @@
             event.preventDefault();      
             $.ajax({
                 "url": "/logout",
-                "method": "GET",
+                "method": "POST",
+                "data": {
+                    "username": window.localStorage.username
+                },
                 "success": function(data) {
                     if (data) {
                         window.location.replace("/");

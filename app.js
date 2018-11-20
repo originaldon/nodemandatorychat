@@ -13,13 +13,7 @@ userRoutes.userRoutes(app);
 */
 //TODO : fix routing
 
-/*
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-*/
+var onlineUsersDict = [];
 
 const session = require('express-session')
 app.use(session({
@@ -54,10 +48,10 @@ app.get("/", function (req, res) {
 });
 
 app.get("/freshfruit", function (req,res){
-    console.log("Inside freshfruit endpoint")
-    console.log(req.session.isLoggedIn)
+    //console.log("Inside freshfruit endpoint")
+    //console.log(req.session.isLoggedIn)
     if(req.session.isLoggedIn){
-        console.log(__dirname + "/public/freshFruit/freshFruit.html")
+        //console.log(__dirname + "/public/freshFruit/freshFruit.html")
         res.sendFile(__dirname + "/public/freshFruit/freshFruit.html");
     }else{
         res.send('not logged in redirect');
@@ -71,43 +65,18 @@ app.get("/bananachat", function (req,res){
 app.get("/bunchofgrapes", function (req,res){
     res.sendFile(__dirname + "/public/bunchofgrapes/bunchofgrapes.html");
 });
-/*
-app.get("/get-messages", (req, res) =>{
-    //if (req.session.isLoggedIn){
-        let updateArray = [{"user": "test", "message": "test"}];
-        //hardcoded room id
-        db.messages.query().select().where({"room_id": 1}).then(messageArray => {
-            console.log(messageArray);
-            
-            messageArray.forEach(element => {
-                db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
-                    console.log(userArray);
-                    updateArray.push({"user": userArray[0].username, "message": element.message_text});
-                    console.log({"user": userArray[0].username, "message": element.message_text});
-                    console.log("updated array during: " + updateArray);
-                });
-                
-            });
-    }).done(() => {
-        console.log("updatedArray: " + updateArray);
-        res.send(updateArray);
-    });
-    //}
-    //res.send({ "status": 403, "response": "unauthorized"});
-});*/
-
 
 io.on('connect', socket => {
 
     db.messages.query().select().where({"room_id": 1}).then(messageArray => {
-        console.log(messageArray);
+        //console.log(messageArray);
         
         messageArray.forEach(element => {
             db.users.query().select({"username": "username"}).where({"id": element.user_id}).then(userArray => {
-                console.log(userArray);
+                //console.log(userArray);
                 //socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
                 socket.emit('fruit-chat', {"user_name": userArray[0].username, "message": element.message_text});
-                console.log({"user": userArray[0].username, "message": element.message_text});
+                //console.log({"user": userArray[0].username, "message": element.message_text});
                 //console.log("updated array during: " + updateArray);
             });
             
@@ -122,31 +91,19 @@ io.on('connect', socket => {
         console.log(data);
         //db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
         db.users.query().select({"id": "id"}).where({"username": data.user_name}).then(userArray => {
-            console.log("userArray: " + userArray);
+            //console.log("userArray: " + userArray);
             const userId = userArray[0].id;
-            console.log("user_id " + userId);
+            //console.log("user_id " + userId);
             db.messages.query().insert({ "message_text": data.message, "user_id": userId, "room_id": 1, "timestamp": new Date() }).then(persistedData => {
-                console.log(persistedData);
+                //console.log(persistedData);
             }).then(() => {
             io.emit("fruit-chat", data);
             });
         });
-        //hardcoded roomId!!
-        
 
-        /*
-        id: {type: 'integer'},
-                message_text: {type: 'integer'},
-                user_id: {type: 'integer'},
-                room_id: {type: 'integer'},
-                timestamp: {type: 'dateTime'}
-        */
-
-        // emits only to the specific socket
-        //socket.emit("here's the color", data);
+        //socket.on('users-oline', data => {
         
-        // emits to all but the socket itself
-        //socket.broadcast.emit("here's the color", data);
+        //})
     })
 })
 
@@ -163,7 +120,7 @@ app.post("/signup", function (req, res) {
 
         console.log('query db -> username:' + enteredUsername + " password -> " + enteredPassword) 
         // Herunder kan man bruge shorthand hvor man kun skriver password, hvis kollonen hedder password
-        db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
+        db.users.query().select({ password: "password", userId: "id" }).where({"username": enteredUsername}).then(userArray => {
             console.log(userArray);
             if (userArray.length > 0) {
                 console.log(enteredPassword);
@@ -173,11 +130,17 @@ app.post("/signup", function (req, res) {
                     if(response) {
                         req.session.isLoggedIn = true;
                         console.log("ses" + req.session.isLoggedIn);
+
+                        onlineUsersDict.push(enteredUsername);
+                        console.log(onlineUsersDict);
+                        io.emit('userlist', onlineUsersDict);
+
                         res.json({"response":"Logged In"});
                     } else {
                         res.json({"response":"Not loggedin"});
                     }
                 });
+                
             } else {
                 bcrypt.hash(enteredPassword, saltRounds).then(function(hash) {
                     db.users.query().insert({ "username": enteredUsername, "password": hash }).then(persistedData => {
@@ -192,26 +155,31 @@ app.post("/signup", function (req, res) {
     }
 });
 
-app.post('/login', (req, res) => {
-    const enteredUsername = req.body.username;
-    const enteredPassword = req.body.password; 
+// app.post('/login', (req, res) => {
+//     const enteredUsername = req.body.username;
+//     const enteredPassword = req.body.password; 
 
-    db.users.query().select().where({email}).then(userArray => {
-        if (userArray.length > 0) {
-            bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
-                if(response) {
-                    req.session.isLoggedIn = true;
-                    console.log("ses" + req.session.isLoggedIn);
-                    res.redirect('/freshfruit');
-                }
-                res.send({ "status": 403, "response": "unauthorized"})
-            })
-        }     
-    })
-});
+//     db.users.query().select().where({email}).then(userArray => {
+//         if (userArray.length > 0) {
+//             bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
+//                 if(response) {
+//                     req.session.isLoggedIn = true;
+//                     console.log("ses" + req.session.isLoggedIn);
+//                     res.redirect('/freshfruit');
+//                 }
+//                 res.send({ "status": 403, "response": "unauthorized"})
+//             })
+//         }     
+//     })
+// });
 
-app.get('/logout', (req,res) => {
+app.post('/logout', (req,res) => {
     req.session.destroy();
+    var index = onlineUsersDict.indexOf(req.body.username);
+    if (index > -1) {
+        onlineUsersDict.splice(index, 1);
+    }
+    console.log(onlineUsersDict);
     res.redirect("/");
 });
 

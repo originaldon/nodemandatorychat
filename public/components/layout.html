@@ -39,7 +39,7 @@
             <h3>Online now:</h3>
         </div>
         <div class="cell for-footer">
-            (c) Joey Hermano Enterprises
+            © Joey Hermano Enterprises
         </div>
     </div>
     <script>
@@ -54,19 +54,18 @@
                 $('#main-chat').append("<p>" + element.user + ": " + element.message + "</p>");
             });
         });*/
-            console.log("script runs - layout");
+            //console.log("script runs - layout");
             const socket = io.connect('http://localhost:3000');
             $("#chatchat").click((event) => {
-                const userName = window.localStorage.username;
                 event.preventDefault();
-                console.log("happens");
+                const userName = window.localStorage.username;
                if (socket.connected){
                 socket.emit('fruit-chat',{"user_name": userName, "message": $("#text-input").val()}) 
                 //var chatscreen = $('#cell main-chat');
-                console.log("<p>" + userName + ": " + $("#text-input").val() + "</p>")
+                //console.log("<p>" + userName + ": " + $("#text-input").val() + "</p>")
                 //$('#main-chat').append("<p>" + userName + ": " + $("#text-input").val() + "</p>");
                 //$('#main-chat').val($('#main-chat').val() + "\r\n" + userName + ": " + $("#text-input").val());
-                $("#text-input").val("") 
+                $("#text-input").val("");
                } else {
                    //alert("You have been disconnected");
                    window.location.replace('/');
@@ -78,10 +77,35 @@
                 $('#main-chat').append("<p>" + fruitMessage.user_name + ": " + fruitMessage.message + "</p>");       
                 $("#main-chat").scrollTop($("#main-chat").prop("scrollHeight"));
             });
-            socket.on("userlist", (userlist) => {
-                $(".right-menu").val = "";
-                $(".right-menu").append("<p>" + userlist + "</p>");
+            socket.on("userjoin", (userData) => {
+
+                $(".right-menu").append("<div id=\"" + userData.username + "\">" + userData.username + "</div>");
+                console.log("<p id=\"" + userData.username + "\">" + userData.username + "</p>");
             });
+            socket.on("userquit", userData => {
+                //console.log(userData);
+                //$(".right-menu").remove("#" + userData.username);
+                $("#" + userData.username).remove();
+                console.log("trying to remove ", "#" + userData.username);
+            });
+            /*
+            socket.on("userlist", (data) => {
+                console.log("userlist: " + data);
+                console.log(typeof data);
+                const userlist = JSON.stringify(data);
+                console.log(typeof userlist);
+                console.log(userlist);
+                const userArray = userlist.split(",");
+                console.log(typeof userArray);
+                console.log(userArray);
+                $(".right-menu").val = "";
+                userArray.forEach(element => {
+                    console.log(element);
+                    $(".right-menu").append("<p>" + element + "</p>");
+                });
+                
+                
+            });*/
     </script>
 
     <script>

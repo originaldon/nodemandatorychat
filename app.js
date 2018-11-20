@@ -1,7 +1,6 @@
 const Knex = require("knex");
 const express = require('express');
 const app = express();
-//const cors = require('cors');
 const Model = require("objection").Model;
 const knexConfig = require("./knexfile");
 const bodyParser = require('body-parser');
@@ -13,7 +12,7 @@ userRoutes.userRoutes(app);
 */
 //TODO : fix routing
 
-var onlineUsersDict = [];
+var onlineUsersList = [];
 
 const session = require('express-session')
 app.use(session({
@@ -23,12 +22,9 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-//var myCookie;
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/public', express.static('public'))
-//app.use(cors({credentials: true, origin:true}));
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 
@@ -57,7 +53,7 @@ app.get("/freshfruit", function (req,res){
         res.send('not logged in redirect');
     }
 });
-
+/*
 app.get("/bananachat", function (req,res){
     res.sendFile(__dirname + "/public/bananachat/bananachat.html");
 });
@@ -65,7 +61,7 @@ app.get("/bananachat", function (req,res){
 app.get("/bunchofgrapes", function (req,res){
     res.sendFile(__dirname + "/public/bunchofgrapes/bunchofgrapes.html");
 });
-
+*/
 io.on('connect', socket => {
 
     db.messages.query().select().where({"room_id": 1}).then(messageArray => {
@@ -82,19 +78,25 @@ io.on('connect', socket => {
             
         });
     });
+    //io.emit('userlist',  onlineUsersList);
+    onlineUsersList.forEach(element => {
+        socket.emit('userjoin', {"username" : element});
+    });
+    
+
 
 
 
     socket.on('fruit-chat', data => {
         // emits to all the sockets
-        console.log("got a fruit-chat message");
-        console.log(data);
+        //console.log("got a fruit-chat message");
+        //console.log(data);
         //db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
         db.users.query().select({"id": "id"}).where({"username": data.user_name}).then(userArray => {
             //console.log("userArray: " + userArray);
-            const userId = userArray[0].id;
+            //const userId = userArray[0].id;
             //console.log("user_id " + userId);
-            db.messages.query().insert({ "message_text": data.message, "user_id": userId, "room_id": 1, "timestamp": new Date() }).then(persistedData => {
+            db.messages.query().insert({ "message_text": data.message, "user_id": userArray[0].id, "room_id": 1, "timestamp": new Date() }).then(persistedData => {
                 //console.log(persistedData);
             }).then(() => {
             io.emit("fruit-chat", data);
@@ -118,22 +120,22 @@ app.post("/signup", function (req, res) {
 
     if (enteredUsername && enteredPassword) {
 
-        console.log('query db -> username:' + enteredUsername + " password -> " + enteredPassword) 
+        //console.log('query db -> username:' + enteredUsername + " password -> " + enteredPassword) 
         // Herunder kan man bruge shorthand hvor man kun skriver password, hvis kollonen hedder password
-        db.users.query().select({ password: "password", userId: "id" }).where({"username": enteredUsername}).then(userArray => {
-            console.log(userArray);
+        db.users.query().select({ password: "password"}).where({"username": enteredUsername}).then(userArray => {
+            //console.log(userArray);
             if (userArray.length > 0) {
-                console.log(enteredPassword);
-                console.log(userArray[0]);
+                //console.log(enteredPassword);
+                //console.log(userArray[0]);
 
                 bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
                     if(response) {
                         req.session.isLoggedIn = true;
-                        console.log("ses" + req.session.isLoggedIn);
+                        //console.log("ses" + req.session.isLoggedIn);
 
-                        onlineUsersDict.push(enteredUsername);
-                        console.log(onlineUsersDict);
-                        io.emit('userlist', onlineUsersDict);
+                        onlineUsersList.push(enteredUsername);
+                        //console.log(onlineUsersList);
+                        io.emit("userjoin", {"username": enteredUsername});
 
                         res.json({"response":"Logged In"});
                     } else {
@@ -144,7 +146,7 @@ app.post("/signup", function (req, res) {
             } else {
                 bcrypt.hash(enteredPassword, saltRounds).then(function(hash) {
                     db.users.query().insert({ "username": enteredUsername, "password": hash }).then(persistedData => {
-                        console.log(persistedData);
+                        //console.log(persistedData);
                         res.json({"response":"User written to db"});
                     });
                 });   
@@ -175,11 +177,14 @@ app.post("/signup", function (req, res) {
 
 app.post('/logout', (req,res) => {
     req.session.destroy();
-    var index = onlineUsersDict.indexOf(req.body.username);
+    var index = onlineUsersList.indexOf(req.body.username);
     if (index > -1) {
-        onlineUsersDict.splice(index, 1);
+        onlineUsersList.splice(index, 1);
     }
-    console.log(onlineUsersDict);
+    console.log(onlineUsersList);
+    //io.emit('userlist', onlineUsersList);
+    console.log(req.body.username);
+    io.emit('userquit', {"username" : req.body.username});
     res.redirect("/");
 });
 

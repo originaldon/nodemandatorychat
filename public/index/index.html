@@ -6,43 +6,37 @@
     <title>Python Fruit Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-    <!--<link rel="stylesheet" type="text/css" media="screen" href="index.css" />-->
+    <link rel="stylesheet" type="text/css" media="screen" href="../public/index/index.css" />
     <script src="../public/main.js"></script>
 </head>
-<body>
+<body background="../public/images/john-cleese-background.jpeg">
     <div class="top"></div>
     <div class="mid-left"></div>
     <div class="login-field">
+        <h1>FRUIT CHAT</h1>
+        <h2>WELCOME</h2>
         <form id="submitform">
-            <ul>
-                <li>
                     <input type="text" class="email" name="emailField" id="emailField" placeholder="enter email" value="x">
-                </li>
-                <li>
+<br>
                     <input type="text" class="password" name="passwordField" id="passwordField" placeholder="enter password" value="y">
-                </li>
-                <li>
-                    <button type="submit" id="signUpButton">
-                        Sign Up
-                    </button>
+<br>
                     <button type="submit" id="logInButton">
-                        Log In
+                        Login / Signup
                     </button>
-                </li>
-
-            </ul>
+<br>
+                    <p id="response"></p>
+<br>
             
             
         </form>
     </div>
-    <div id="response"></div>
     <div class="mid-right"></div>
     <div class="bottom"></div>
 
     <script>
 
 
-    $( "#logInButton" ).click(function(event) {
+    $( "#logInButton" ).click((event) => {
 
         event.preventDefault();
         const jsonFormObj = {"username":$("#emailField").val(), "password":$("#passwordField").val()};

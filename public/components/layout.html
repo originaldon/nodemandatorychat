@@ -19,20 +19,16 @@
             </div>
             <div class="log-out">
                 <br>
-                -username-
-                <br>
-                <br>
-                <button>LOGOUT</button>
+                <p id="user-logged-in"></p>
+                <button id="logout-btn">LOGOUT</button>
             </div>
         </div>
         <div class="cell left-menu">
         </div>
         <div class="cell main-area">
                 <div class="cell main-chat" id="main-chat">
-                        cell main-chat
-                    </div>
+                </div>
             <div class="cell message-input">
-                cell messages-input
                 <form>
                     <input class="text-input" type="text-area" id="text-input"/>
                     <button id="chatchat">SEND MESSAGE</button>
@@ -79,9 +75,31 @@
     
                     });
             socket.on("fruit-chat", (fruitMessage) => {
-                $('#main-chat').append("<p>" + fruitMessage.user_name + ": " + fruitMessage.message + "</p>");
+                $('#main-chat').append("<p>" + fruitMessage.user_name + ": " + fruitMessage.message + "</p>");       
+                $("#main-chat").scrollTop($("#main-chat").prop("scrollHeight"));
             });
-                </script>
+    </script>
+
+    <script>
+        $("#user-logged-in").append("Logged in as " + window.localStorage.username);
+    </script>
+
+    <script>
+        $("#logout-btn").click((event) => {
+            event.preventDefault();      
+            $.ajax({
+                "url": "/logout",
+                "method": "GET",
+                "success": function(data) {
+                    if (data) {
+                        window.location.replace("/");
+                    }
+                }
+            }).done(response => {
+                console.log("session expired");
+            });
+        });   
+    </script>
     
 </body>
 </html>

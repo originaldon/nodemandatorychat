@@ -64,6 +64,8 @@
 .main-chat {
     grid-column: span;
     background-color: grey;
+    overflow: scroll;
+    max-height: 440px;
 }
 
 .message-input {

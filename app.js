@@ -169,19 +169,18 @@ app.post("/signup", function (req, res) {
                 console.log(enteredPassword);
                 console.log(userArray[0]);
 
-                if (enteredPassword === userArray[0].password) {
-                    req.session.isLoggedIn = true;
-                    //myCookie = req.session.isLoggedIn;
-                    console.log(req.session.isLoggedIn)
-                    res.json({"response":"Logged In"});
-                } else {
-                    res.json({"response":"Not loggedin"});
-                }
+                bcrypt.compare(enteredPassword, userArray[0].password).then(response => {
+                    if(response) {
+                        req.session.isLoggedIn = true;
+                        console.log("ses" + req.session.isLoggedIn);
+                        res.json({"response":"Logged In"});
+                    } else {
+                        res.json({"response":"Not loggedin"});
+                    }
+                });
             } else {
-                // Man kan bruge .wherenotexists
-
                 bcrypt.hash(enteredPassword, saltRounds).then(function(hash) {
-                    db.users.query().insert({ "username": enteredUsername, "password": enteredPassword }).then(persistedData => {
+                    db.users.query().insert({ "username": enteredUsername, "password": hash }).then(persistedData => {
                         console.log(persistedData);
                         res.json({"response":"User written to db"});
                     });
@@ -212,7 +211,8 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/logout', (req,res) => {
-
+    req.session.destroy();
+    res.redirect("/");
 });
 
 
